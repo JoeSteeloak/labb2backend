@@ -1,18 +1,39 @@
 const express = require('express');
 const cors = require("cors");
+const sqlite3 = require('sqlite3').verbose();
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
+
+//connect till databas
+let db = new sqlite3.Database('./CV_db.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+        console.error(err.message);
+    }
+    console.log('Connected to the database.');
+});
 
 app.use(cors()); //hindrar cors-error när man kallar på API
 app.use(express.json()); //middleware som gör att vi kan läsa in body från Json
 
 //Routes
 app.get("/api", (req, res) => {
-    res.json({message: "Welcome to my API"});
+    res.json({ message: "Welcome to my API" });
 });
 
-app.get("/api/users", (req, res) => {
-    res.json({message: "Get users"});
+app.get("/api/workexperience", (req, res) => {
+    
+    //Get workexperience
+    sql = `SELECT * FROM workexperience`;
+
+    db.all(sql, (err, rows) => {
+        if(err) {
+            res.status(500).jason({error: "something went wrong: " + err});
+            return;
+        }
+
+        console.log(rows);
+    });
 });
 
 app.post("/api/users", (req, res) => {
@@ -28,7 +49,7 @@ app.post("/api/users", (req, res) => {
         }
     };
 
-    if(!name || !email) {
+    if (!name || !email) {
         //error messages
         errors.message = "Name and email not included";
         errors.detail = "You must include both name and email in JSON";
@@ -47,15 +68,15 @@ app.post("/api/users", (req, res) => {
         email: email
     };
 
-    res.json({message: "User added", user});
+    res.json({ message: "User added", user });
 });
 
 app.put("/api/users/:id", (req, res) => {
-    res.json({message: "User updated: " + req.params.id});
+    res.json({ message: "User updated: " + req.params.id });
 });
 
 app.delete("/api/users/:id", (req, res) => {
-    res.json({message: "User deleted: " + req.params.id});
+    res.json({ message: "User deleted: " + req.params.id });
 });
 
 
