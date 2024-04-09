@@ -32,7 +32,6 @@ app.get("/api/workexperience", (req, res) => {
             return;
         }
 
-        console.log(rows);
         if (rows.length === 0) {
             res.status(404).json({ message: "no work experience found" });
         } else {
@@ -74,15 +73,13 @@ app.post("/api/workexperience", (req, res) => {
 
     //add work experience to database
 
-    const sql = `INSERT INTO workexperience(companyname, jobtitle, location, startdate, enddate, description) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO workexperience(companyname, jobtitle, location, startdate, enddate, description) VALUES (?, ?, ?, ?, ?, ?);`;
 
     db.all(sql, [companyname, jobtitle, location, startdate, enddate, description], (err, results) => {
         if (err) {
-            res.status(500).jason({ error: "something went wrong: " + err });
+            res.status(500).json({ error: "something went wrong: " + err });
             return;
         }
-
-        console.log("Query made: " + results);
 
         let data = {
             companyname: companyname,
@@ -97,12 +94,69 @@ app.post("/api/workexperience", (req, res) => {
     });
 });
 
-app.put("/api/users/:id", (req, res) => {
-    res.json({ message: "User updated: " + req.params.id });
+//uppdatera data
+app.put("/api/workexperience/:id", (req, res) => {
+
+    let companyname = req.body.companyname;
+    let jobtitle = req.body.jobtitle;
+    let location = req.body.location;
+    let startdate = req.body.startdate;
+    let enddate = req.body.enddate;
+    let description = req.body.description;
+
+    const id = req.params.id;
+
+    //error handling
+    let errors = {
+        message: "",
+        detail: "",
+        https_response: {
+
+        }
+    };
+
+    if (!companyname || !jobtitle || !location || !startdate || !enddate || !description || !id) {
+        //error messages
+        errors.message = "Missing data";
+        errors.detail = "You must include companyname, jobtitle, location, startdate, enddate, description and id in JSON";
+
+        //response code
+        errors.https_response.message = "Bad Request";
+        errors.https_response.code = 400;
+
+        res.status(400).json(errors);
+
+        return;
+    }
+
+    const sql = `UPDATE workexperience SET companyname = ?, jobtitle = ?, location = ?, startdate = ?, enddate = ?, description = ? WHERE id = ?`;
+
+    db.run(sql, [companyname, jobtitle, location, startdate, enddate, description, id], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: "something went wrong: " + err });
+            return;
+        }
+
+        res.json({ message: "User updated: " + req.params.id });
+    });
+
 });
 
-app.delete("/api/users/:id", (req, res) => {
-    res.json({ message: "User deleted: " + req.params.id });
+//Ta bort rader från databasen
+app.delete("/api/workexperience/:id", (req, res) => {
+
+    const id = req.params.id;
+
+    const sql = `DELETE FROM workexperience WHERE id = ?`;
+
+    db.run(sql, [id], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: "something went wrong: " + err });
+            return;
+        }
+
+        res.json({ message: "User deleted: " + req.params.id });
+    });
 });
 
 
