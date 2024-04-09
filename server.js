@@ -22,24 +22,32 @@ app.get("/api", (req, res) => {
 });
 
 app.get("/api/workexperience", (req, res) => {
-    
+
     //Get workexperience
     const sql = `SELECT * FROM workexperience`;
 
     db.all(sql, (err, rows) => {
-        if(err) {
-            res.status(500).jason({error: "something went wrong: " + err});
+        if (err) {
+            res.status(500).jason({ error: "something went wrong: " + err });
             return;
         }
 
         console.log(rows);
-        res.json(rows); // Skicka resultaten tillbaka som JSON-svar
+        if (rows.length === 0) {
+            res.status(404).json({ message: "no work experience found" });
+        } else {
+            res.json(rows); // Skicka resultaten tillbaka som JSON-svar
+        }
     });
 });
 
-app.post("/api/users", (req, res) => {
-    let name = req.body.name;
-    let email = req.body.email;
+app.post("/api/workexperience", (req, res) => {
+    let companyname = req.body.companyname;
+    let jobtitle = req.body.jobtitle;
+    let location = req.body.location;
+    let startdate = req.body.startdate;
+    let enddate = req.body.enddate;
+    let description = req.body.description;
 
     //error handling
     let errors = {
@@ -50,10 +58,10 @@ app.post("/api/users", (req, res) => {
         }
     };
 
-    if (!name || !email) {
+    if (!companyname || !jobtitle || !location || !startdate || !enddate || !description) {
         //error messages
-        errors.message = "Name and email not included";
-        errors.detail = "You must include both name and email in JSON";
+        errors.message = "Missing data";
+        errors.detail = "You must include companyname, jobtitle, location, startdate, enddate, and description in JSON";
 
         //response code
         errors.https_response.message = "Bad Request";
@@ -64,12 +72,29 @@ app.post("/api/users", (req, res) => {
         return;
     }
 
-    let user = {
-        name: name,
-        email: email
-    };
+    //add work experience to database
 
-    res.json({ message: "User added", user });
+    const sql = `INSERT INTO workexperience(companyname, jobtitle, location, startdate, enddate, description) VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.all(sql, [companyname, jobtitle, location, startdate, enddate, description], (err, results) => {
+        if (err) {
+            res.status(500).jason({ error: "something went wrong: " + err });
+            return;
+        }
+
+        console.log("Query made: " + results);
+
+        let data = {
+            companyname: companyname,
+            jobtitle: jobtitle,
+            location: location,
+            startdate: startdate,
+            enddate: enddate,
+            description: description,
+        };
+
+        res.json({ message: "work experience added", data });
+    });
 });
 
 app.put("/api/users/:id", (req, res) => {
