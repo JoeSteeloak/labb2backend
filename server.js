@@ -24,7 +24,7 @@ app.get("/api", (req, res) => {
 app.get("/api/workexperience", (req, res) => {
     
     //Get workexperience
-    sql = `SELECT * FROM workexperience`;
+    const sql = `SELECT * FROM workexperience`;
 
     db.all(sql, (err, rows) => {
         if(err) {
@@ -33,6 +33,7 @@ app.get("/api/workexperience", (req, res) => {
         }
 
         console.log(rows);
+        res.json(rows); // Skicka resultaten tillbaka som JSON-svar
     });
 });
 
