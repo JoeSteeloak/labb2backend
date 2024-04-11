@@ -3,7 +3,7 @@ Detta repository innehåller kod för ett enklare REST API byggt med Express. AP
 Grundläggande funktionalitet för CRUD (Create, Read, Update, Delete) är implementerad.
 
 ## Installation, databas
-APIet använder en -databas.
+APIet använder en SQLite-databas.
 Klona ner källkodsfilerna, kör kommando npm install för att installera nödvändiga npm-paket. Repositorit innehåller databasen CV_db.db där tabellen redan är skapad. 
 databastabellen ser ut som följande:
 CREATE TABLE "workexperience" (
